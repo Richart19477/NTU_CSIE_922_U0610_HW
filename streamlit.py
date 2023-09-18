@@ -1,12 +1,12 @@
 import streamlit as st
 
 import cv2
-from PIL import Image
-import imageio
+#from PIL import Image
+#import imageio
 import numpy as np
-import pandas as pd
+#import pandas as pd
 import matplotlib.pyplot as plt
-import seaborn as sns
+#import seaborn as sns
 
 
 # Page config
@@ -16,6 +16,10 @@ st.set_page_config(
     layout="centered",
     initial_sidebar_state="collapsed",
 )
+
+# Stable Variances:
+if 'state_1' not in st.session_state:
+    st.session_state['state_1'] = 0
 
 # Page title
 st.title('NTU CSIE_5732 : Computer Vision 2023')
@@ -33,17 +37,20 @@ with tab1:
 
    # button
    image_0 = None
-   """
-   btn1 = st.button("Upload Image by yourself here")
-   if btn1:
+   cv_image_0 = None
+   if st.button("Upload Image by yourself here"):
+      st.session_state.state_1 = 1
+   if st.session_state.state_1 >= 1:
       # Upload Image
       image_0 = st.file_uploader("Upload Image", type=['jpg', 'png', 'bmp'])
       if image_0 is not None:
          file_bytes = np.asarray(bytearray(image_0.read()), dtype=np.uint8)
          cv_image_0 = cv2.imdecode(file_bytes, 1)
+         st.write(cv_image_0.shape)
+         # Fix color issue
+         cv_image_0[:,:, [0, 2]] = cv_image_0[:,:, [2, 0]]
          st.info("Successfully uploaded!")
-   """
-   if image_0 is None:
+   else: #if image_0 is None:
       st.info("Preload Image Used")
       cv_image_0 = cv2.imread("figs/lena.bmp")
 
