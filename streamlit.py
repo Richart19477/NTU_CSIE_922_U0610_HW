@@ -72,7 +72,7 @@ with tab1:
             cv_image_0[i][j][k] = cv_image_0[cv_image_0.shape[0] - i - 1][j][k]
             cv_image_0[cv_image_0.shape[0] - i - 1][j][k] = tmp
    st.image(cv_image_0, caption="Upside-down Image", use_column_width=False)
-
+   cv2.imwrite("output/1a.png", cv_image_0)
 
    # 1.b
    st.subheader("(b) right-side-left lena.bmp")
@@ -86,7 +86,8 @@ with tab1:
             cv_image_0[i][cv_image_0.shape[1] - j - 1][k] = tmp
 
    st.image(cv_image_0, caption="Upside-down Image", use_column_width=False)
-   
+   cv2.imwrite("output/1b.png", cv_image_0)
+
    st.subheader("(c) diagonally flip lena.bmp")
 
    # 1.c
@@ -100,6 +101,7 @@ with tab1:
             cv_image_0[j][i][k] = tmp
 
    st.image(cv_image_0, caption="Diagonally-flipped Image", use_column_width=False)
+   cv2.imwrite("output/1c.png", cv_image_0)
 
    st.title("Part2. Write a program or use software to do the following requirement.")
    st.subheader("(d) rotate lena.bmp 45 degrees clockwise")
@@ -110,6 +112,7 @@ with tab1:
    rotation_matrix = cv2.getRotationMatrix2D((w/2, h/2), -45, 1.0)   # Note that in cv2 the clockwise is negative
    cv_image_0 = cv2.warpAffine(cv_image_0, rotation_matrix, (w, h))
    st.image(cv_image_0, caption="Rotated Image", use_column_width=False)
+   cv2.imwrite("output/2d.png", cv_image_0)
    
    st.subheader("(e) shrink lena.bmp in half")
    st.write("Image shape before shrink: ", cv_image_0.shape)
@@ -118,11 +121,13 @@ with tab1:
    cv_image_0 = cv2.resize(cv_image_0, (w//2 ,h//2), interpolation=cv2.INTER_AREA)
    st.image(cv_image_0, caption="Shrinked Image", use_column_width=False)
    st.write("Image shape after shrink: ", cv_image_0.shape)
+   cv2.imwrite("output/2e.png", cv_image_0)
 
    st.subheader("(f) binarize lena.bmp at 128 to get a binary image")
    cv_image_0 = cv_image_origin.copy()
    _, binary_image = cv2.threshold(cv_image_0, 128, 255, cv2.THRESH_BINARY)
    st.image(binary_image, caption="Binary Image", use_column_width=False)
+   cv2.imwrite("output/2f.png", cv_image_0)
       
 
 with tab2:
