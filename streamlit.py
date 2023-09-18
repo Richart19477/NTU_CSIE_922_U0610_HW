@@ -33,6 +33,7 @@ with tab1:
 
    # button
    image_0 = None
+   """
    btn1 = st.button("Upload Image by yourself here")
    if btn1:
       # Upload Image
@@ -41,6 +42,7 @@ with tab1:
          file_bytes = np.asarray(bytearray(image_0.read()), dtype=np.uint8)
          cv_image_0 = cv2.imdecode(file_bytes, 1)
          st.info("Successfully uploaded!")
+   """
    if image_0 is None:
       st.info("Preload Image Used")
       cv_image_0 = cv2.imread("figs/lena.bmp")
