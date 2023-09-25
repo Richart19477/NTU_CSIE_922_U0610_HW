@@ -232,12 +232,11 @@ with tab2:
                if t != l and t > 0 and l > 0:
                   ref_matrix[ ref_matrix == max(t, l) ] = min(t, l)
 
-   st.write(ref_matrix)
+   #st.write(ref_matrix)
 
    dict_connected_component = []
    for uniq in np.unique(ref_matrix):
       if uniq == 0:
-         st.write("0")
          continue
 
       loc = np.where(ref_matrix == uniq)
@@ -263,9 +262,6 @@ with tab2:
    for value_list in dict_connected_component:
       value_np = np.asarray(value_list)
       cv_image_1 = cv2.rectangle(cv_image_1, (min(value_np[:, 1]), min(value_np[:, 0])), (max(value_np[:, 1]), max(value_np[:, 0])), (224, 58, 76), 2)
-      
-      st.write(value_np[:,1].mean())
-
       cv_image_1 = cv2.circle(cv_image_1, (value_np[:,1].mean().astype(int), value_np[:,0].mean().astype(int)) , 2, (242, 139, 50), 5)
 
       #value_list = [(x2, x1) for x1, x2 in value_list]
