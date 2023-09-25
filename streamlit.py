@@ -6,7 +6,7 @@ import cv2
 import numpy as np
 #import pandas as pd
 import matplotlib.pyplot as plt
-#import seaborn as sns
+import seaborn as sns
 
 
 # Page config
@@ -132,4 +132,154 @@ with tab1:
 
 with tab2:
    st.header("HW2")
-   st.warning("Coming soon ...")
+
+   st.info("Preload Image Used")
+   cv_image_1 = cv2.imread("figs/lena.bmp")
+
+   # Show image   
+   st.image(cv_image_1, caption="Original Image", use_column_width=False)
+
+   cv_image_origin = cv_image_1.copy()
+   cv_image_1 = cv_image_origin.copy()
+
+   # (a) a binary image (threshold at 128)
+   st.subheader("(a) a binary image (threshold at 128)")
+   st.write("Image shape: ", cv_image_1.shape)
+   for i in range(cv_image_1.shape[0]):
+      for j in range(cv_image_1.shape[1]):
+         for k in range(cv_image_1.shape[2]):
+            if cv_image_1[i][j][k] < 128:
+               cv_image_1[i][j][k] = 0
+            else:
+               cv_image_1[i][j][k] = 255
+            
+            
+   st.image(cv_image_1, caption="a binary image (threshold at 128) Image", use_column_width=False)
+   cv2.imwrite("output/2_1a.png", cv_image_1)
+
+
+   # (b) a histogram
+   cv_image_1 = cv_image_origin.copy()
+
+   st.subheader("(b) a histogram")
+   # A numpy array with length of 256
+   hist_arr = np.zeros(256)
+
+   for i in range(cv_image_1.shape[0]):
+      for j in range(cv_image_1.shape[1]):
+         for k in range(cv_image_1.shape[2]):
+            hist_arr[ cv_image_1[i][j][k] ] += 1
+               
+   dx = np.arange(256)
+
+   hist_arr //= 3 # The figure supposed to be calculated in B&W
+
+   # Plot the histogram
+   # Create Seaborn plot
+   plt.figure(figsize=(10, 6))
+   sns.barplot(x = dx, y = hist_arr)
+   idx = 0
+   for label in plt.gca().get_xticklabels():
+      if idx % 50 != 0:
+         label.set_visible(False)
+      idx += 1
+   st.pyplot(plt)
+
+   plt.savefig("output/2_1b.png", dpi=None, format='png')
+
+   
+   # (c) connected components (regions with + at centroid, bounding box)
+   cv_image_1 = cv_image_origin.copy()
+
+   st.subheader("(c) connected components ")
+   cv_image_1 = cv2.imread("figs/lena.bmp", cv2.IMREAD_GRAYSCALE) # read image in grayscale
+
+   st.write("Image shape: ", cv_image_1.shape, "(Grayscale)")
+
+   # Transform the image into binary image
+   for i in range(cv_image_1.shape[0]):
+      for j in range(cv_image_1.shape[1]):
+         if cv_image_1[i][j] < 128:
+            cv_image_1[i][j] = 0
+         else:
+            cv_image_1[i][j] = 1
+
+   cv_image_gray = cv_image_1.copy()
+   # st.image(cv_image_1, caption="a binary image ", use_column_width=False)
+
+   # Here the 4-connected component policy will be adopted
+   # First, we have to create a map with the identical size of original image
+   # Second, Check (1) top and (2) left pixel, if they're already 
+
+   ref_matrix = np.zeros(cv_image_1.shape).astype(int)
+   idx_now = 1
+
+   # Connected component
+   for i in range(cv_image_1.shape[0]):
+      for j in range(cv_image_1.shape[1]):
+         if cv_image_1[i][j] == 1:
+         
+            t = ref_matrix[i-1, j] if i - 1 >= 0 else 0
+            l = ref_matrix[i, j-1] if j - 1 >= 0 else 0
+                
+            if t == 0 and l == 0:
+               ref_matrix[i, j] = idx_now
+               idx_now += 1
+            else:
+               m = min(t, l)
+               ref_matrix[i, j] = m if m > 0 else max(t, l)
+               
+               if t != l and t > 0 and l > 0:
+                  ref_matrix[ ref_matrix == max(t, l) ] = min(t, l)
+
+   st.write(ref_matrix)
+
+   dict_connected_component = []
+   for uniq in np.unique(ref_matrix):
+      if uniq == 0:
+         st.write("0")
+         continue
+
+      loc = np.where(ref_matrix == uniq)
+      loc_list = list(zip(loc[0], loc[1]))
+      
+      if len( loc_list)  > 500:
+         dict_connected_component.append(loc_list)
+      
+   st.info(f"Number of connected components (>500): {len(dict_connected_component)}")
+
+   
+   #cv_image_1 = cv_image_gray.copy()
+   cv_image_1 = cv2.imread("figs/lena.bmp", cv2.IMREAD_GRAYSCALE) # read image in grayscale
+   for i in range(cv_image_1.shape[0]):
+      for j in range(cv_image_1.shape[1]):
+         if cv_image_1[i][j] < 128:
+            cv_image_1[i][j] = 0
+         else:
+            cv_image_1[i][j] = 255
+
+   cv_image_1 = np.stack((cv_image_1,)*3, axis=-1)
+
+   for value_list in dict_connected_component:
+      value_np = np.asarray(value_list)
+      cv_image_1 = cv2.rectangle(cv_image_1, (min(value_np[:, 1]), min(value_np[:, 0])), (max(value_np[:, 1]), max(value_np[:, 0])), (224, 58, 76), 2)
+      
+      st.write(value_np[:,1].mean())
+
+      cv_image_1 = cv2.circle(cv_image_1, (value_np[:,1].mean().astype(int), value_np[:,0].mean().astype(int)) , 2, (242, 139, 50), 5)
+
+      #value_list = [(x2, x1) for x1, x2 in value_list]
+      #top_left = min(value_list, key=lambda p: (p[0], p[1]))
+      #bottom_right = max(value_list, key=lambda p: (p[0], p[1]))
+
+      #st.write(np.asarray(value_list).shape)
+      #st.write("tl & br", top_left, bottom_right)
+      #top_left = (min(value[0]), max(value[1]))
+      #bottom_right = (max(value[0]), min(value[1]))
+      #cv_image_1 = cv2.rectangle(cv_image_1, (top_left[1], top_left[0]), (bottom_right[1], bottom_right[0]), (224, 58, 76), 2)
+      #cv_image_1 = cv2.rectangle(cv_image_1, (min(value_list[1]), min(value_list[0])), (max(value_list[1]), max(value_list[0])), (224, 58, 76), 2)
+      
+      #cv_image_1 = cv2.rectangle(cv_image_1, top_left, bottom_right, (224, 58, 76), 2)
+
+
+   st.image(cv_image_1, caption="Connected Component Image", use_column_width=False)
